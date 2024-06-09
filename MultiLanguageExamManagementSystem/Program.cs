@@ -10,6 +10,8 @@ using MultiLanguageExamManagementSystem.Services;
 using Serilog;
 using Microsoft.AspNetCore.Hosting;
 using MultiLanguageExamManagementSystem.Helpers;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +23,14 @@ IMapper mapper = mapperConfiguration.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Change this line
 
 //builder.Services.AddScoped<IExamService, ExamService>();
 builder.Services.AddScoped<ICultureService, CultureService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)

@@ -5,8 +5,8 @@ namespace MultiLanguageExamManagementSystem.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) 
-        { 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
         }
 
         public DbSet<Language> Languages { get; set; }
@@ -17,16 +17,21 @@ namespace MultiLanguageExamManagementSystem.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Your code here
-            // One contry can have multiple languages, once you delete a country, all languages related
-            // to it should be deleted, but not vice versa
+            modelBuilder.Entity<Country>()
+                .HasMany(c => c.Languages)
+                .WithOne(l => l.Country)
+                .HasForeignKey(l => l.CountryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // One language can have multiple localization resources, once you delete a language, all localization resources related
-            // to it should be deleted, but not vice versa
+            modelBuilder.Entity<Language>()
+                .HasMany(l => l.LocalizationResources)
+                .WithOne(lr => lr.Language)
+                .HasForeignKey(lr => lr.LanguageId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Localization resource table should have a unique index,
-            // meaning that there can not be two records that have the same namespace and key
+            modelBuilder.Entity<LocalizationResource>()
+                .HasIndex(lr => new { lr.Namespace, lr.Key })
+                .IsUnique();
         }
-
     }
 }
